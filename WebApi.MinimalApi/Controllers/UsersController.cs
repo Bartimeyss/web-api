@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using WebApi.MinimalApi.Domain;
 using WebApi.MinimalApi.Models;
+using AutoMapper;
 
 namespace WebApi.MinimalApi.Controllers;
 
@@ -9,10 +10,12 @@ namespace WebApi.MinimalApi.Controllers;
 public class UsersController : Controller
 {
     private IUserRepository userRepository;
+    private IMapper mapper;
     // Чтобы ASP.NET положил что-то в userRepository требуется конфигурация
-    public UsersController(IUserRepository userRepository)
+    public UsersController(IUserRepository userRepository, IMapper mapper)
     {
         this.userRepository = userRepository;
+        this.mapper = mapper;
     }
 
     [Produces("application/json", "application/xml")]
@@ -24,8 +27,8 @@ public class UsersController : Controller
         {
             return NotFound();
         }
-        var userDto = new UserDto(user);
-        return Ok(userDto);
+        var response = mapper.Map<UserDto>(user);
+        return Ok(response);
     }
 
     [HttpPost]

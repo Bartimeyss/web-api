@@ -8,14 +8,4 @@ public class UserDto
     public string FullName { get; set; }
     public int GamesPlayed { get; set; }
     public Guid? CurrentGameId { get; set; }
-    
-    public UserDto() {}
-    public UserDto(UserEntity userEntity)
-    {
-        this.Id = userEntity.Id;
-        this.Login = userEntity.Login;
-        this.FullName = $"{userEntity.LastName} {userEntity.FirstName}";
-        this.GamesPlayed = userEntity.GamesPlayed;
-        this.CurrentGameId = userEntity.CurrentGameId;
-    }
 }

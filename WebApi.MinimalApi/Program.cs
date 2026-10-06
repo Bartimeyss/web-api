@@ -1,4 +1,5 @@
 using WebApi.MinimalApi.Domain;
+using WebApi.MinimalApi.Models;
 
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Formatters;
@@ -27,6 +28,11 @@ builder.Services.AddControllers(options =>
         options.SuppressModelStateInvalidFilter = true;
         options.SuppressMapClientErrors = true;
     });
+builder.Services.AddAutoMapper(cfg =>
+        {
+            cfg.CreateMap<UserEntity, UserDto>()
+                .ForMember(dest => dest.FullName, opt => opt.MapFrom(src => $"{src.LastName} {src.FirstName}"));
+        });
 builder.Services.AddSingleton<IUserRepository, InMemoryUserRepository>();
 var app = builder.Build();
 
