@@ -19,7 +19,7 @@ public class UsersController : Controller
     }
 
     [Produces("application/json", "application/xml")]
-    [HttpGet("{userId}")]
+    [HttpGet("{userId}", Name = nameof(GetUserById))]
     public ActionResult<UserDto> GetUserById([FromRoute] Guid userId)
     {
         var user = userRepository.FindById(userId);
@@ -32,8 +32,23 @@ public class UsersController : Controller
     }
 
     [HttpPost]
-    public IActionResult CreateUser([FromBody] object user)
+    public IActionResult CreateUser([FromBody] CreateUserDto user)
     {
-        throw new NotImplementedException();
+        if (user is null)
+            return BadRequest();
+        if (!userEntity.Login.All(c => char.IsLetterOrDigit(c)))
+            ModelState.AddModelError(userEntity.Login, "Не поддерживаемые символы в логине");
+        if (!ModelState.IsValid)
+            return UnprocessableEntity(ModelState);
+
+
+
+
+        var userEntity = mapper.Map<UserEntity>(user);
+        userEntity = userRepository.Insert(userEntity);
+        return CreatedAtRoute(
+            nameof(GetUserById),
+            new { userId = userEntity.Id },
+            userEntity);
     }
 }
