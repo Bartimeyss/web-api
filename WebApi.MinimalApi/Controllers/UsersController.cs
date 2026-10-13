@@ -54,4 +54,16 @@ public class UsersController : Controller
             new { userId = userEntity.Id },
             mapper.Map<UserDto>(userEntity));
     }
+
+    [HttpDelete("{userId}")]
+    public IActionResult DeleteUser([FromRoute] Guid userId)
+    {
+        if (userRepository.FindById(userId) is null)
+        {
+            return NotFound();
+        }
+
+        userRepository.Delete(userId);
+        return NoContent();
+    }
 }
