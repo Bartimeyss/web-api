@@ -36,19 +36,22 @@ public class UsersController : Controller
     {
         if (user is null)
             return BadRequest();
-        if (!userEntity.Login.All(c => char.IsLetterOrDigit(c)))
-            ModelState.AddModelError(userEntity.Login, "Не поддерживаемые символы в логине");
+        var userEntity = mapper.Map<UserEntity>(user);
+
+        if (string.IsNullOrEmpty(userEntity.Login))
+            ModelState.AddModelError("login", "Login cannot be empty");
+        else if (!userEntity.Login.All(char.IsLetterOrDigit))
+            ModelState.AddModelError("login", "Unacceptable chars in login");
+
+
         if (!ModelState.IsValid)
             return UnprocessableEntity(ModelState);
 
-
-
-
-        var userEntity = mapper.Map<UserEntity>(user);
         userEntity = userRepository.Insert(userEntity);
+
         return CreatedAtRoute(
             nameof(GetUserById),
             new { userId = userEntity.Id },
-            userEntity);
+            mapper.Map<UserDto>(userEntity));
     }
 }
