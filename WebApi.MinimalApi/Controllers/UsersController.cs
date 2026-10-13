@@ -3,6 +3,8 @@ using WebApi.MinimalApi.Domain;
 using WebApi.MinimalApi.Models;
 using AutoMapper;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Serialization;
+using Microsoft.AspNetCore.JsonPatch;
 
 namespace WebApi.MinimalApi.Controllers;
 
@@ -143,5 +145,38 @@ public class UsersController : Controller
                 userEntity.Id);
         }
         return NoContent();
+    }
+
+
+    [HttpPatch("{userId}")]
+       [Consumes("application/json-patch+json")]
+    public IActionResult PartiallyUpdateUser(
+        [FromRoute] Guid userId,
+        [FromBody] JsonPatchDocument<UpdateUserDto> patchDoc)
+    {
+        if (patchDoc is null)
+            return BadRequest();
+
+        var existingUser = userRepository.FindById(userId);
+        if (existingUser is null)
+            return NotFound();
+
+        var update = mapper.Map<UpdateUserDto>(existingUser);
+        patchDoc.ApplyTo(update, ModelState);
+        TryValidateModel(update);
+
+        if (!ModelState.IsValid)
+            return UnprocessableEntity(ModelState);
+
+        mapper.Map(update, existingUser);
+        userRepository.Update(existingUser);
+        return NoContent();
+    }
+
+    [HttpOptions]
+    public IActionResult GetOptions()
+    {
+        Response.Headers.Add("Allow", "GET, POST, OPTIONS");
+        return Ok();
     }
 }
