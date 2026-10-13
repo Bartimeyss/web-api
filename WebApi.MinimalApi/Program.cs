@@ -40,6 +40,8 @@ builder.Services.AddControllers(options =>
         cfg.CreateMap<UserEntity, UserDto>()
             .ForMember(dest => dest.FullName, opt => opt.MapFrom(src => $"{src.LastName} {src.FirstName}"));
         cfg.CreateMap<CreateUserDto, UserEntity>();
+        cfg.CreateMap<UpdateUserDto, UserEntity>()
+            .ForMember(dest => dest.Id, opt => opt.Ignore());
     });
 builder.Services.AddSingleton<IUserRepository, InMemoryUserRepository>();
 var app = builder.Build();

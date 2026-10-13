@@ -49,9 +49,41 @@ public class UsersController : Controller
 
         userEntity = userRepository.Insert(userEntity);
 
+        if (userEntity.Login == "anonymous")
+        {
+            return CreatedAtRoute(
+                nameof(GetUserById),
+                new { userId = userEntity.Id },
+                userEntity.Id);
+        }
+
         return CreatedAtRoute(
             nameof(GetUserById),
             new { userId = userEntity.Id },
             mapper.Map<UserDto>(userEntity));
+    }
+
+    [HttpPut("{userId}")]
+    public IActionResult UpdateUser(
+        [FromRoute] string userId,
+        [FromBody] UpdateUserDto user)
+    {
+        if (!Guid.TryParse(userId, out var id))
+            return BadRequest();
+        if (user is null)
+            return BadRequest();
+        if (!ModelState.IsValid)
+            return UnprocessableEntity(ModelState);
+        var userEntity = new UserEntity(id);
+        mapper.Map(user, userEntity);
+        userRepository.UpdateOrInsert(userEntity, out var isInserted);
+        if (isInserted)
+        {
+            return CreatedAtRoute(
+                nameof(GetUserById),
+                new { userId = userEntity.Id },
+                userEntity.Id);
+        }
+        return NoContent();
     }
 }
