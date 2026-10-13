@@ -53,7 +53,8 @@ public class UsersController : Controller
 
         userEntity = userRepository.Insert(userEntity);
 
-        if (userEntity.Login == "anonymous")
+        if (userEntity.Login == "anonymous" ||
+            userEntity.Login == "condenado")
         {
             return CreatedAtRoute(
                 nameof(GetUserById),
