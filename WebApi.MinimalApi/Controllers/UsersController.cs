@@ -35,6 +35,20 @@ public class UsersController : Controller
         return Ok(response);
     }
 
+    [HttpHead("{userId}")]
+    public IActionResult HeadUserById([FromRoute] Guid userId)
+    {
+        if (userRepository.FindById(userId) is null)
+            return NotFound();
+
+        return new ContentResult
+        {
+            StatusCode = StatusCodes.Status200OK,
+            ContentType = "application/json; charset=utf-8",
+            Content = string.Empty
+        };
+    }
+
     [HttpPost]
     public IActionResult CreateUser([FromBody] CreateUserDto user)
     {
