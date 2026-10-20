@@ -24,29 +24,23 @@ public class UsersController : Controller
 
     [Produces("application/json", "application/xml")]
     [HttpGet("{userId}", Name = nameof(GetUserById))]
-    public ActionResult<UserDto> GetUserById([FromRoute] Guid userId)
+    [HttpHead("{userId}")]
+    public IActionResult GetUserById([FromRoute] Guid userId)
     {
         var user = userRepository.FindById(userId);
         if (user is null)
-        {
             return NotFound();
-        }
         var response = mapper.Map<UserDto>(user);
-        return Ok(response);
-    }
-
-    [HttpHead("{userId}")]
-    public IActionResult HeadUserById([FromRoute] Guid userId)
-    {
-        if (userRepository.FindById(userId) is null)
-            return NotFound();
-
-        return new ContentResult
+        if (HttpMethods.IsHead(Request.Method))
         {
-            StatusCode = StatusCodes.Status200OK,
-            ContentType = "application/json; charset=utf-8",
-            Content = string.Empty
-        };
+            var contentType = Request.Headers.Accept.ToString().Contains("application/xml")
+                ? "application/xml; charset=utf-8"
+                : "application/json; charset=utf-8";
+
+            return new ContentResult { ContentType = contentType, Content = string.Empty };
+        }
+
+        return Ok(response);
     }
 
     [HttpPost]
